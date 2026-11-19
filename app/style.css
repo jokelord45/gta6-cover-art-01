@@ -1,12 +1,186 @@
-html, body { margin: 0; height: 100%; background: #f2f0f4; color: #1d1b22; font: 15px/1.4 system-ui, sans-serif; }
-.app { display: flex; gap: 32px; align-items: center; justify-content: center; height: 100%; padding: 24px; box-sizing: border-box; }
-.controls { display: flex; flex-direction: column; gap: 14px; width: 280px; }
-.controls h1 { margin: 0; font-size: 28px; }
-.controls p { margin: 0; color: #5c5866; }
-label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
-input[type=text] { font: inherit; padding: 8px; border: 1px solid #c9c4d1; border-radius: 6px; }
-button { font: inherit; font-weight: 700; padding: 10px; border: 0; border-radius: 6px; background: #1d1b22; color: #fff; cursor: pointer; }
-canvas { width: min(70vh, 60vw); height: min(70vh, 60vw); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); }
-body.shot-cover .controls { display: none; }
-body.shot-cover .app { padding: 0; }
-body.shot-cover canvas { width: 100vw; height: 100vh; box-shadow: none; }
+@font-face {
+  font-family: "Anton";
+  src: url("./fonts/Anton-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+/* Anton is under the SIL Open Font License 1.1 — see fonts/OFL.txt. */
+
+:root {
+  --ink: #f4eef7;
+  --ink-dim: #b9aec4;
+  --bg: #120a1c;
+  --panel-bg: #1d1229;
+  --panel-line: #3a2450;
+  --accent: #ff5e8a;
+  --accent-2: #22d3ee;
+  --accent-3: #ffb020;
+  --field: #2a1a3d;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--panel-line);
+  background: linear-gradient(90deg, #2b1040, #3d0f33 55%, #0f2a3d);
+}
+
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 46px; height: 46px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #ff7a3d 55%, var(--accent-3));
+  color: #1a0b26;
+  font-weight: 900;
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  box-shadow: 0 0 22px rgba(255, 94, 138, 0.55);
+}
+.brand h1 { margin: 0; font-size: 21px; letter-spacing: 0.02em; }
+.brand p { margin: 2px 0 0; color: var(--ink-dim); font-size: 13px; max-width: 560px; }
+
+.workbench {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+  padding: 20px 22px 28px;
+  align-items: start;
+}
+
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-line);
+  border-radius: 14px;
+  padding: 6px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.group { padding: 12px 0; border-top: 1px solid var(--panel-line); }
+.group:first-child { border-top: 0; }
+.group h2 { margin: 0 0 10px; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-2); }
+.hint { margin: 8px 0 0; color: var(--ink-dim); font-size: 12.5px; }
+.panel-name { margin: 0 0 8px; font-weight: 700; }
+
+label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 13px; margin-bottom: 10px; }
+input[type="text"] {
+  font: inherit;
+  padding: 9px 10px;
+  border: 1px solid var(--panel-line);
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--ink);
+}
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+input[type="color"] { width: 56px; height: 34px; padding: 2px; border: 1px solid var(--panel-line); border-radius: 8px; background: var(--field); }
+
+button {
+  font: inherit;
+  font-weight: 700;
+  padding: 9px 12px;
+  border: 1px solid var(--panel-line);
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--ink);
+  cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button.primary {
+  background: linear-gradient(135deg, var(--accent), #ff7a3d);
+  border: 0;
+  color: #1a0b26;
+  padding: 11px 20px;
+  font-size: 15px;
+  box-shadow: 0 0 18px rgba(255, 94, 138, 0.45);
+}
+button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1a0b26;
+}
+
+.layout-row, .grade-row, .size-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.photo-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.file-btn {
+  display: inline-flex; align-items: center;
+  font-weight: 700;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: var(--accent-2);
+  color: #06222b;
+  cursor: pointer;
+}
+.file-btn input { display: none; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.thumbs:empty { display: none; }
+.thumb {
+  width: 64px; height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: block;
+  padding: 0;
+  background: none;
+}
+.thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; display: block; }
+.thumb[aria-pressed="true"] { border-color: var(--accent-3); box-shadow: 0 0 12px rgba(255, 176, 32, 0.6); }
+
+.stage-wrap { display: flex; justify-content: center; }
+.stage-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+#stage {
+  max-width: 100%;
+  max-height: calc(100vh - 190px);
+  border-radius: 6px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--panel-line);
+  cursor: crosshair;
+  touch-action: none;
+}
+.stage-caption { color: var(--ink-dim); font-size: 13px; }
+
+#status { margin: 8px 0 0; color: var(--accent-3); font-weight: 600; min-height: 1.2em; }
+
+/* Screenshot mode: hide the controls, fill the window with the cover. */
+body.shot-cover .topbar,
+body.shot-cover .panel,
+body.shot-cover .stage-caption { display: none; }
+body.shot-cover .workbench { display: block; padding: 0; }
+body.shot-cover .stage-wrap { display: block; }
+body.shot-cover .stage-frame { display: block; }
+body.shot-cover #stage {
+  max-width: none;
+  max-height: none;
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  .workbench { grid-template-columns: 1fr; }
+  .brand p { display: none; }
+}
